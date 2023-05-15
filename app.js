@@ -50,7 +50,7 @@ app.listen(8000, () => {
   (async () => {
 
     //apro il browser con tanto di interfaccia grafica (headless: false)
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: false, executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe' });
     const page = await browser.newPage();
   
     //cerco il seguente URL nel browser
@@ -66,22 +66,35 @@ app.listen(8000, () => {
      await page.keyboard.press("Enter");
 
      
-     const searchResultSelector = '._LM';
+     const searchResultSelector = '.KxHAYs.lystZ1.FxZV-M._4F506m.ZkIJC-.r9BRio.qXofat.EKabf7.nBq1-s._2MyPg2';
      await page.waitForSelector(searchResultSelector);
 
 
      //await page.click(searchResultSelector);
      
+     //raccoglie tutti gli elementi specificati dal selettore preso come parametro 
+     const product = await page.$(searchResultSelector);
+
+     await product.click();
+
      
-     const products = await page.$$(searchResultSelector);
+     await page.waitForSelector('._5qdMrS.VHXqc_.rceRmQ._4NtqZU.mIlIve');
+     const product1 = await page.$('._5qdMrS.VHXqc_.rceRmQ._4NtqZU.mIlIve');
 
-     const pageTitle = await page.evaluate((product) => {
-         // Estrai le informazioni del prodotto utilizzando il DOM
-         const title = product.querySelector(".KxHAYs.lystZ1.FxZV-M._4F506m.ZkIJC-.r9BRio.qXofat.EKabf7.nBq1-s._2MyPg2").textContent;
-         return title;
-     }, products[0]);
 
-      console.log(pageTitle);
+     const sneaker = await page.evaluate(el => {
+      const title = el.querySelector(".EKabf7.R_QwOV").textContent;
+      console.log(title);
+      const price = el.querySelector(".KxHAYs._4sa1cA.FxZV-M._4F506m").textContent;
+      console.log(price);
+      const brand = el.querySelector("._6zR8Lt.gr9aYh.FxZV-M._4F506m._5Yd-hZ").textContent;
+      console.log(brand);
 
+      return ({title,price,brand})
+
+},product1);
+
+
+     console.log(sneaker);
 
   })(); 
