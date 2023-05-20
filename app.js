@@ -48,53 +48,68 @@ app.listen(8000, () => {
  
 
   (async () => {
-
-    //apro il browser con tanto di interfaccia grafica (headless: false)
     const browser = await puppeteer.launch({ headless: false, executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe' });
-    const page = await browser.newPage();
-  
-    //cerco il seguente URL nel browser
-    await page.goto('https://www.zalando.it/donna-home/'); 
-  
-    //indico la grandezza dell'interfaccia grafica 
-    //anche se l'interfaccia grafica fosse non visibile è importante definirne la grandezza poichè , 
-    //,in base al layout, alcuni dati potrebbero essere disponibili e altri no 
+    var page = await browser.newPage();
+    await page.goto('https://www.zalando.it/donna-home/');
     await page.setViewport({width: 1080, height: 1024});
 
-     await page.type('.z-navicat-header_searchInput', 'scarpe nike'); 
-     
-     await page.keyboard.press("Enter");
+    await page.type('.z-navicat-header_searchInput', 'scarpe nike');  
+    await page.keyboard.press("Enter"); 
 
-     
-     const searchResultSelector = '.KxHAYs.lystZ1.FxZV-M._4F506m.ZkIJC-.r9BRio.qXofat.EKabf7.nBq1-s._2MyPg2';
-     await page.waitForSelector(searchResultSelector);
+    const filtroButton = "button.J1Rmt-._6-WsK3.Md_Vex.Nk_Omi._MmCDa._0xLoFW.FCIprz.NN8L-8._2kjxJ6.FxZV-M._7Nzrmq.LyRfpJ.K82if3.heWLCX.mo6ZnF._4F506m";
+   
+    await page.waitForSelector(filtroButton);
 
+    await page.click(filtroButton);
 
-     //await page.click(searchResultSelector);
-     
-     //raccoglie tutti gli elementi specificati dal selettore preso come parametro 
-     const product = await page.$(searchResultSelector);
+    await page.click(filtroButton);
 
-     await product.click();
+    const selector = ".ks8JjI.r9BRio.qXofat.ZkIJC-.pMa0tB.JCuRr_";
 
-     
-     await page.waitForSelector('._5qdMrS.VHXqc_.rceRmQ._4NtqZU.mIlIve');
-     const product1 = await page.$('._5qdMrS.VHXqc_.rceRmQ._4NtqZU.mIlIve');
+    await page.waitForSelector(selector); 
+// Ottieni tutti gli elementi che corrispondono al selettore
+const elements = await page.$$(selector);
 
-
-     const sneaker = await page.evaluate(el => {
-      const title = el.querySelector(".EKabf7.R_QwOV").textContent;
-      console.log(title);
-      const price = el.querySelector(".KxHAYs._4sa1cA.FxZV-M._4F506m").textContent;
-      console.log(price);
-      const brand = el.querySelector("._6zR8Lt.gr9aYh.FxZV-M._4F506m._5Yd-hZ").textContent;
-      console.log(brand);
-
-      return ({title,price,brand})
-
-},product1);
+// Controlla che ci siano almeno 5 elementi
+if(elements.length >= 5){
+  // Fai click sul quinto elemento
+  await elements[4].click();
+}else{
+  console.log('Non ci sono abbastanza elementi che corrispondono al selettore');
+}
 
 
-     console.log(sneaker);
+    
+    const searchResultSelector = '._5qdMrS.w8MdNG.cYylcv.BaerYO._75qWlu.iOzucJ.JT3_zV._Qe9k6';
+    await page.waitForSelector(searchResultSelector); 
 
-  })(); 
+    const products = await page.$$(searchResultSelector); 
+var x = 0; 
+
+    for(let product of products){
+  
+        const sneaker = await page.evaluate(el => {
+          if(el.querySelector(".KxHAYs.lystZ1.FxZV-M._4F506m.ZkIJC-.r9BRio.qXofat.EKabf7.nBq1-s._2MyPg2") == null)
+        return null;
+
+            const title = el.querySelector(".KxHAYs.lystZ1.FxZV-M._4F506m.ZkIJC-.r9BRio.qXofat.EKabf7.nBq1-s._2MyPg2").textContent;
+   
+            const price = el.querySelector("section._0xLoFW._78xIQ-").textContent;
+
+            const brand = el.querySelector("h3._6zR8Lt.lystZ1.FxZV-M._4F506m.ZkIJC-.r9BRio.qXofat.EKabf7.nBq1-s._2MyPg2").textContent;
+
+            return ({title, price, brand}) 
+   
+        },product);
+
+        if(sneaker == null) {console.log("NULLA");x++;}
+
+        else{
+        console.log(sneaker);
+        x++; }
+      }
+      console.log(x);  
+       
+})();
+
+//button.J1Rmt-._6-WsK3.Md_Vex.Nk_Omi._MmCDa._0xLoFW.FCIprz.NN8L-8._2kjxJ6.FxZV-M._7Nzrmq.LyRfpJ.K82if3.heWLCX.mo6ZnF._4F506m > span.ODGSbs._99qBVG.gaJRiA.BaerYO.JCuRr_.KxHAYs._2kjxJ6.FxZV-M
